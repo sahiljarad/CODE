@@ -1,0 +1,103 @@
+1)Client.java
+
+import java.io.*;
+import java.net.*;
+import java.util.Random;
+
+public class Client {
+    public static void main(String[] args) {
+        try {
+            // Get a unique ID for each client
+            int clientId = (args.length > 0) ? Integer.parseInt(args[0]) : new Random().nextInt(1000);
+
+            // Generate a different clock time for each client (e.g., 3.00, 2.50, 2.75)
+            double[] predefinedTimes = {3.00, 2.50, 2.75}; 
+            double myTime = predefinedTimes[clientId % predefinedTimes.length]; // Ensure different times
+
+            // Connect to the server
+            Socket socket = new Socket("localhost", 5000);
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            // Send unique clock time to the server
+            out.println(myTime);
+            System.out.println("Client " + (clientId + 1) + " sent time: " + myTime);
+
+            // Receive time adjustment from the server
+            double adjustment = Double.parseDouble(in.readLine());
+            myTime += adjustment;
+            System.out.println("Client " + (clientId + 1) + " adjusted time: " + myTime);
+
+            // Close the connection
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Invalid client ID argument.");
+        }
+    }
+}
+2)Server,java
+import java.io.*;
+import java.net.*;
+import java.util.*;
+
+public class Server {
+    public static void main(String[] args) {
+        try {
+            ServerSocket serverSocket = new ServerSocket(5000);
+            System.out.println("Server started... Waiting for clients.");
+
+            List<Socket> clients = new ArrayList<>();
+            List<Double> times = new ArrayList<>();
+
+            // Master clock time (Server's own time)
+            double masterTime = 3.20;
+            times.add(masterTime);
+
+            // Accept 3 clients
+            while (clients.size() < 3) {
+                Socket socket = serverSocket.accept();
+                clients.add(socket);
+                System.out.println("Client " + clients.size() + " connected.");
+            }
+
+            // Receive times from clients
+            for (Socket client : clients) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+                double time = Double.parseDouble(in.readLine());
+                times.add(time);
+            }
+
+            // Calculate average time
+            double total = 0;
+            for (double t : times) {
+                total += t;
+            }
+            double avgTime = total / times.size();
+            System.out.println("Synchronized Time: " + avgTime);
+
+            // Send time adjustments to clients
+            for (int i = 0; i < clients.size(); i++) {
+                PrintWriter out = new PrintWriter(clients.get(i).getOutputStream(), true);
+                double offset = avgTime - times.get(i + 1);
+                out.println(offset);
+            }
+
+            // Close connections
+            for (Socket client : clients) {
+                client.close();
+            }
+            serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+command :
+java Server
+java Client 0
+java Client 1
+java Client 2
+
