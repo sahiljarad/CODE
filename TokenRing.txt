@@ -1,0 +1,61 @@
+import java.io.*;
+import java.util.*;
+
+class TokenRing{
+
+    public static void main(String args[]) throws Throwable {
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Enter the number of nodes in the ring:");
+        int n = scan.nextInt();
+        
+        // Display the ring structure
+        System.out.print("Ring Structure: ");
+        for (int i = 0; i < n; i++) {
+            System.out.print(i + " -> ");
+        }
+        System.out.println("0\n");
+
+        int token = 0; // Token starts at node 0
+        boolean continuePassing = true;
+
+        while (continuePassing) {
+            System.out.println("Current Token Holder: Node " + token);
+
+            // Ask the current node if it wants to access the resource
+            System.out.print("Does node " + token + " want to access the resource? (1 = Yes, 0 = No): ");
+            int accessDecision = scan.nextInt();
+            while (accessDecision != 1 && accessDecision != 0) {
+                System.out.print("Invalid input. Enter 1 (Yes) or 0 (No): ");
+                accessDecision = scan.nextInt();
+            }
+
+            if (accessDecision == 1) {
+                System.out.println("Node " + token + " accessing the resource...");
+            } else {
+                System.out.println("Node " + token + " did not access the resource.");
+            }
+
+            // Ask user whether to pass the token to the next node
+            System.out.print("Do you want to pass the token to the next node? (1 = Yes, 0 = No): ");
+            int ch = scan.nextInt();
+            while (ch != 1 && ch != 0) {
+                System.out.print("Invalid input. Enter 1 (Yes) or 0 (No): ");
+                ch = scan.nextInt();
+            }
+
+            if (ch == 1) {
+                token = (token + 1) % n; // Pass token to next node
+            } else {
+                continuePassing = false;
+                System.out.println("Token passing stopped by user.");
+            }
+            System.out.println();
+        }
+
+        System.out.println("Token Ring Mutual Exclusion Simulation ended.");
+        scan.close();
+    }
+}
+
+command  javac TokenRing.java
+java TokenRing
