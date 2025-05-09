@@ -1,0 +1,50 @@
+import java.rmi.*;
+public class SumClient {
+	public static void main(String args[]) {
+		try {
+			//String sumServerURL = "rmi://" + args[0] + "/SUM-SERVER";
+			String sumServerURL = "rmi://localhost/SUM-SERVER";
+			SumServerIntf sumServerIntf = (SumServerIntf)Naming.lookup(sumServerURL);
+			int m = 5;
+			int n = 6;
+			System.out.println("The sum is: " + sumServerIntf.sum(m, n));
+			}
+		catch(Exception e) {
+			System.out.println("Exception: " + e);
+				}
+		}
+
+	}
+
+2)import java.net.*;
+import java.rmi.*;
+public class SumServer {
+	public static void main(String args[]) {
+		try {
+			SumServerImpl sumServerImpl = new SumServerImpl();
+			Naming.rebind("SUM-SERVER", sumServerImpl);
+			}
+		catch(Exception e) {
+			System.out.println("Exception: " + e);
+				}
+		}
+}
+3)
+import java.rmi.*;
+import java.rmi.server.*;
+public class SumServerImpl extends UnicastRemoteObject implements SumServerIntf {
+	public SumServerImpl() throws RemoteException {
+							}
+	public int sum(int m, int n) throws RemoteException {
+		return m + n;
+	}
+	public int sub(int m, int n) throws RemoteException {
+		return m - n;
+	}
+
+}
+4)import java.rmi.*;
+public interface SumServerIntf extends Remote {
+	int sum(int m, int n) throws RemoteException;
+}
+
